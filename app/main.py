@@ -16,7 +16,7 @@ from . import abuse_guard, captcha
 from .checks.base import STATUS_ICON
 from .report import run_all_checks
 
-app = FastAPI(title="Security Checkup")
+app = FastAPI(title="Diagnóstico de Segurança - Nebula Host")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 templates.env.globals["STATUS_ICON"] = STATUS_ICON

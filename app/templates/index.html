@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Security Checkup — verifique a segurança do seu negócio</title>
+  <title>Diagnóstico de Segurança — um serviço gratuito da Nebula Host</title>
   <link rel="stylesheet" href="/static/style.css">
   {% if turnstile_site_key %}
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -11,8 +11,17 @@
 </head>
 <body>
   <main class="wrap">
-    <h1>🔒 Security Checkup</h1>
-    <p class="subtitle">Descubra em menos de 1 minuto se o seu negócio está vulnerável a golpes e ataques — sem precisar entender nada de tecnologia.</p>
+    <header class="brand">
+      <img src="/static/img/nebula-logo.png" alt="Nebula Host">
+      <span class="by">Diagnóstico de Segurança</span>
+    </header>
+
+    <h1>🔍 Descubra os riscos de segurança do seu negócio</h1>
+    <p class="subtitle">Em menos de 1 minuto, sem precisar entender nada de tecnologia.</p>
+
+    <div class="free-notice">
+      <strong>Esse serviço é 100% gratuito.</strong> A Nebula Host oferece esse diagnóstico como forma de ajudar a comunidade a entender melhor os riscos de segurança do dia a dia — sem fins lucrativos com essa ferramenta.
+    </div>
 
     {% if error %}
     <p class="error">{{ error }}</p>
@@ -42,6 +51,10 @@
     </form>
 
     <p class="disclaimer">Verifique apenas domínios que você possui ou tem autorização para analisar.</p>
+
+    <footer class="site-footer">
+      Um serviço gratuito de <a href="https://nebulahost.com.br">Nebula Host</a> para a comunidade.
+    </footer>
   </main>
 </body>
 </html>

@@ -3,11 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Relatório de segurança — {{ report.domain }}</title>
+  <title>Relatório de segurança — {{ report.domain }} — Nebula Host</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <main class="wrap">
+    <header class="brand">
+      <img src="/static/img/nebula-logo.png" alt="Nebula Host">
+      <span class="by">Diagnóstico de Segurança</span>
+    </header>
+
     <a href="/" class="back">&larr; Verificar outro site</a>
     <h1>Relatório de segurança</h1>
     <p class="subtitle">{{ report.domain }}</p>
@@ -39,6 +44,10 @@
       </div>
       {% endfor %}
     </div>
+
+    <footer class="site-footer">
+      Um serviço gratuito de <a href="https://nebulahost.com.br">Nebula Host</a> para a comunidade.
+    </footer>
   </main>
 </body>
 </html>
