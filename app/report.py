@@ -9,10 +9,11 @@ from .checks import (
     leaked_secrets,
     phone_breach_check,
     phone_reputation,
+    typosquat,
 )
 from .checks.base import CheckResult, STATUS_WEIGHT
 
-DOMAIN_CHECK_MODULES = [domain_dns, ip_exposure, breach_check, leaked_secrets]
+DOMAIN_CHECK_MODULES = [domain_dns, ip_exposure, breach_check, leaked_secrets, typosquat]
 
 
 @dataclass
