@@ -12,7 +12,7 @@ from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from . import abuse_guard
+from . import abuse_guard, captcha
 from .checks.base import STATUS_ICON
 from .report import run_all_checks
 
@@ -44,6 +44,7 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> Respon
         {
             "request": request,
             "error": "Você atingiu o limite de verificações por enquanto. Espere um pouco e tente de novo.",
+            "turnstile_site_key": captcha.site_key(),
         },
         status_code=429,
     )
@@ -51,7 +52,9 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> Respon
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "error": None})
+    return templates.TemplateResponse(
+        "index.html", {"request": request, "error": None, "turnstile_site_key": captcha.site_key()}
+    )
 
 
 @app.post("/check", response_class=HTMLResponse)
@@ -62,12 +65,27 @@ async def check(
     cnpj: str = Form(""),
     own_phone: str = Form(""),
     suspicious_phone: str = Form(""),
+    cf_turnstile_response: str = Form("", alias="cf-turnstile-response"),
 ):
+    if not captcha.verify(cf_turnstile_response, request.client.host if request.client else None):
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "error": "Não conseguimos confirmar que você não é um robô. Tente marcar a verificação de novo.",
+                "turnstile_site_key": captcha.site_key(),
+            },
+        )
+
     clean = _clean_domain(domain)
     if not clean:
         return templates.TemplateResponse(
             "index.html",
-            {"request": request, "error": "Digite um endereço de site válido, por exemplo: minhaempresa.com.br"},
+            {
+                "request": request,
+                "error": "Digite um endereço de site válido, por exemplo: minhaempresa.com.br",
+                "turnstile_site_key": captcha.site_key(),
+            },
         )
 
     wait_seconds = abuse_guard.seconds_until_domain_available(clean)
@@ -78,6 +96,7 @@ async def check(
             {
                 "request": request,
                 "error": f"Esse domínio já foi verificado há pouco tempo. Tente de novo em cerca de {wait_minutes} minuto(s).",
+                "turnstile_site_key": captcha.site_key(),
             },
         )
 

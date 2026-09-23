@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Security Checkup — verifique a segurança do seu negócio</title>
   <link rel="stylesheet" href="/static/style.css">
+  {% if turnstile_site_key %}
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  {% endif %}
 </head>
 <body>
   <main class="wrap">
@@ -30,6 +33,10 @@
       <label for="suspicious_phone">Número suspeito que te ligou (opcional)</label>
       <input id="suspicious_phone" name="suspicious_phone" type="text" placeholder="(11) 91234-5678">
       <p class="field-hint">Diferente do campo acima: aqui você digita o número de QUEM te ligou, pra checar sinais de golpe (ex: linha VOIP disfarçada de número local).</p>
+
+      {% if turnstile_site_key %}
+      <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+      {% endif %}
 
       <button type="submit">Verificar minha segurança</button>
     </form>
