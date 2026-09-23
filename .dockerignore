@@ -1,0 +1,8 @@
+.venv
+.git
+.env
+__pycache__
+**/__pycache__
+*.pyc
+ANALISE_CIBERSEGURANCA_PME.md
+README.md
