@@ -34,12 +34,26 @@ Depois abra http://localhost:8000
 
 ```
 app/
-  main.py       # rotas FastAPI (formulário + relatório)
-  report.py     # roda todas as checagens e calcula a nota geral
-  checks/       # cada arquivo é uma categoria de checagem (domínio, IP, vazamentos...)
-  templates/    # HTML do formulário e do relatório
-  static/       # CSS
+  main.py         # rotas FastAPI (formulário + relatório)
+  report.py       # roda todas as checagens e calcula a nota geral
+  abuse_guard.py  # proteção contra abuso (cooldown por domínio)
+  checks/         # cada arquivo é uma categoria de checagem (domínio, IP, vazamentos...)
+  templates/      # HTML do formulário e do relatório
+  static/         # CSS
 ```
+
+## Proteção contra abuso
+
+Como o formulário é público e anônimo, sem essas proteções qualquer pessoa poderia usar a ferramenta para varrer porta de domínio de terceiros à vontade, ou estourar o custo das chaves de API pagas (HIBP, Twilio) só martelando o endpoint:
+
+- **Limite por IP:** 5 verificações por hora (via `slowapi`), com mensagem de erro em linguagem simples em vez de um 429 cru.
+- **Cooldown por domínio:** o mesmo domínio não pode ser verificado de novo antes de 10 minutos, não importa quem esteja pedindo — impede que a ferramenta vire um jeito de martelar repetidamente a infraestrutura de outra pessoa.
+
+Limitação conhecida: os dois controles são em memória do processo — reiniciam ao reiniciar o servidor e não são compartilhados entre múltiplos workers/instâncias. Antes de rodar em produção com mais de 1 worker, trocar por um backend compartilhado (ex: Redis).
+
+**Ainda recomendado antes de expor publicamente:**
+- CAPTCHA no formulário (ex: Cloudflare Turnstile) — ainda não implementado, requer criar uma conta/site key própria
+- Servidor de produção atrás de HTTPS (hoje roda com `uvicorn --reload`, modo de desenvolvimento)
 
 ## Roadmap (próximos passos)
 
