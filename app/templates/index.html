@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Security Checkup — verifique a segurança do seu negócio</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <h1>🔒 Security Checkup</h1>
+    <p class="subtitle">Descubra em menos de 1 minuto se o seu negócio está vulnerável a golpes e ataques — sem precisar entender nada de tecnologia.</p>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form action="/check" method="post" class="form">
+      <label for="domain">Digite o site da sua empresa</label>
+      <input id="domain" name="domain" type="text" placeholder="minhaempresa.com.br" required>
+
+      <label for="cnpj">CNPJ da empresa (opcional)</label>
+      <input id="cnpj" name="cnpj" type="text" placeholder="00.000.000/0000-00">
+      <p class="field-hint">Usado só para conferir se a empresa está regular na Receita Federal — útil também para checar fornecedores antes de fechar negócio.</p>
+
+      <label for="own_phone">Seu telefone comercial (opcional)</label>
+      <input id="own_phone" name="own_phone" type="text" placeholder="(11) 91234-5678">
+      <p class="field-hint">Checa se ESSE número (o seu) aparece em vazamentos de dados conhecidos.</p>
+
+      <label for="suspicious_phone">Número suspeito que te ligou (opcional)</label>
+      <input id="suspicious_phone" name="suspicious_phone" type="text" placeholder="(11) 91234-5678">
+      <p class="field-hint">Diferente do campo acima: aqui você digita o número de QUEM te ligou, pra checar sinais de golpe (ex: linha VOIP disfarçada de número local).</p>
+
+      <button type="submit">Verificar minha segurança</button>
+    </form>
+
+    <p class="disclaimer">Verifique apenas domínios que você possui ou tem autorização para analisar.</p>
+  </main>
+</body>
+</html>

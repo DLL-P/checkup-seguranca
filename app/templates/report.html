@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Relatório de segurança — {{ report.domain }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <a href="/" class="back">&larr; Verificar outro site</a>
+    <h1>Relatório de segurança</h1>
+    <p class="subtitle">{{ report.domain }}</p>
+
+    <div class="score score-{{ 'good' if report.score >= 8 else ('mid' if report.score >= 5 else 'bad') }}">
+      <span class="score-number">{{ report.score }}/10</span>
+      <span class="score-label">nota de segurança</span>
+    </div>
+
+    <div class="results">
+      {% for r in report.results %}
+      <div class="card status-{{ r.status.value }}">
+        <div class="card-header">
+          <span class="icon">{{ STATUS_ICON[r.status] }}</span>
+          <h2>{{ r.title }}</h2>
+        </div>
+        <p class="message">{{ r.message }}</p>
+        {% if r.recommendation %}
+        <p class="recommendation"><strong>O que fazer:</strong> {{ r.recommendation }}</p>
+        {% endif %}
+        {% if r.details %}
+        <details>
+          <summary>Detalhes técnicos</summary>
+          <ul>
+            {% for d in r.details %}<li>{{ d }}</li>{% endfor %}
+          </ul>
+        </details>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </main>
+</body>
+</html>
