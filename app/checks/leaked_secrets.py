@@ -50,7 +50,7 @@ def run(domain: str) -> list[CheckResult]:
             message="Não foi possível completar esta verificação agora. Tente novamente mais tarde.",
         )]
 
-    items = list(seen_urls)[:5]
+    items = list(seen_urls)[:10]
     status = Status.WARNING if total else Status.OK
     return [CheckResult(
         check_id="leaked_secrets",
@@ -61,6 +61,11 @@ def run(domain: str) -> list[CheckResult]:
             "(pode incluir falsos positivos, precisa revisão manual)."
             if total else "Nenhum indício encontrado em repositórios públicos do GitHub."
         ),
-        recommendation="Revise manualmente os resultados abaixo — se alguma chave/senha real estiver exposta, revogue-a imediatamente e gere uma nova." if total else "",
-        details=items,
+        recommendation=(
+            "Comprove que o domínio é seu para ver onde estão esses resultados e revise um por um — se alguma "
+            "chave/senha real estiver exposta, revogue-a imediatamente e gere uma nova."
+        ) if total else "",
+        # ONDE estão as chaves só aparece para o dono do domínio: para um
+        # visitante anônimo, essa lista é exatamente o que um atacante procura.
+        private_details=items,
     )]

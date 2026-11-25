@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Meu painel — Diagnóstico de Segurança{% endblock %}
+
+
+
+{% block content %}
+{% set notices = {
+  "dominio-invalido": ("error", "Digite um endereço de site válido, por exemplo: minhaempresa.com.br"),
+  "limite": ("error", "Você chegou ao limite de domínios da conta grátis. Remova um para adicionar outro."),
+  "removido": ("ok", "Domínio removido. Ele não será mais verificado."),
+  "avisos-salvos": ("ok", "Preferências de aviso salvas."),
+  "telefone-invalido": ("error", "Não entendemos esse telefone. Digite com DDD, por exemplo: (81) 99999-9999."),
+  "sem-consentimento": ("error", "Para receber avisos pelo WhatsApp, marque a autorização."),
+  "confirmacao-exclusao": ("error", "Para excluir a conta, digite EXCLUIR no campo de confirmação."),
+} %}
+<h1>Meu painel</h1>
+<p class="subtitle">Conectado como {{ user.email }}</p>
+
+{% if notice and notice in notices %}
+<p class="{{ 'error' if notices[notice][0] == 'error' else 'success' }}">{{ notices[notice][1] }}</p>
+{% endif %}
+
+<section class="panel">
+  <h2>Sites vigiados</h2>
+  <p class="hint">Verificamos cada site comprovado a cada {{ interval_days }} dia(s) e avisamos quando algo piorar.</p>
+  {% if domains %}
+  <ul class="domain-list">
+    {% for d in domains %}
+    <li>
+      <a href="/painel/dominios/{{ d.id }}"><strong>{{ d.domain }}</strong></a>
+      {% if d.verified_at %}
+        <span class="tag tag-ok">vigiado</span>
+        {% if d.last_score is not none %}<span class="tag">nota {{ d.last_score }}/10</span>{% else %}<span class="tag">primeira verificação em andamento</span>{% endif %}
+      {% else %}
+        <span class="tag tag-warn">falta comprovar que é seu</span>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="hint">Nenhum site ainda. Adicione o site da sua empresa abaixo.</p>
+  {% endif %}
+  <form action="/painel/dominios" method="post" class="form compact">
+    <label for="domain">Adicionar site</label>
+    <input id="domain" name="domain" type="text" placeholder="minhaempresa.com.br" required>
+    <button type="submit">Adicionar</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Como você quer ser avisado</h2>
+  <form action="/painel/avisos" method="post" class="form compact">
+    <label class="check"><input type="checkbox" name="email_alerts" value="1" {% if user.email_alerts %}checked{% endif %}> Avisar por e-mail ({{ user.email }})</label>
+    {% if whatsapp_available %}
+    <label for="whatsapp_phone">WhatsApp (opcional)</label>
+    <input id="whatsapp_phone" name="whatsapp_phone" type="tel" placeholder="(81) 99999-9999" value="{{ user.whatsapp_phone or '' }}">
+    <label class="check"><input type="checkbox" name="whatsapp_consent" value="1" {% if user.whatsapp_optin_at %}checked{% endif %}> Autorizo a Nebula Host a me enviar avisos de segurança por WhatsApp neste número. Posso cancelar quando quiser apagando o número.</label>
+    {% else %}
+    <p class="hint">Avisos por WhatsApp ainda não estão disponíveis nesta instância.</p>
+    {% endif %}
+    <button type="submit">Salvar</button>
+  </form>
+</section>
+
+<section class="panel danger">
+  <h2>Excluir minha conta</h2>
+  <p class="hint">Apaga a conta, os sites vigiados, os resultados e o histórico de avisos. Não dá para desfazer.</p>
+  <form action="/painel/excluir-conta" method="post" class="form compact">
+    <label for="confirmar">Digite EXCLUIR para confirmar</label>
+    <input id="confirmar" name="confirmar" type="text" autocomplete="off">
+    <button type="submit" class="danger">Excluir minha conta</button>
+  </form>
+</section>
+{% endblock %}

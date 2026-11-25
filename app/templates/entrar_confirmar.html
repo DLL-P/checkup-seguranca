@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Entrar — Diagnóstico de Segurança{% endblock %}
+
+{% block content %}
+<h1>Quase lá</h1>
+<p class="subtitle">Clique no botão para entrar na sua conta.</p>
+<form action="/entrar/confirmar" method="post" class="form">
+  <input type="hidden" name="token" value="{{ token }}">
+  <button type="submit">Entrar</button>
+</form>
+{% endblock %}

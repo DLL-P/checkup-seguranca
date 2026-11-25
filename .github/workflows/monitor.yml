@@ -1,0 +1,30 @@
+# Agendador do monitoramento: chama o gatilho do site, em lotes pequenos, até
+# não haver mais domínios pendentes. Precisa de:
+#   - secret CHECKUP_CRON_SECRET (o mesmo valor do CRON_SECRET do Fly)
+#   - variável CHECKUP_URL (ex.: https://checkupseguro.fly.dev)
+name: monitoramento
+
+on:
+  schedule:
+    - cron: "17 11 * * *"   # todo dia às 11:17 UTC (8:17 em Brasília)
+  workflow_dispatch:
+
+jobs:
+  monitorar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar domínios pendentes
+        env:
+          URL: ${{ vars.CHECKUP_URL }}
+          SECRET: ${{ secrets.CHECKUP_CRON_SECRET }}
+        run: |
+          if [ -z "$URL" ] || [ -z "$SECRET" ]; then
+            echo "CHECKUP_URL ou CHECKUP_CRON_SECRET não configurados; nada a fazer."
+            exit 0
+          fi
+          for i in $(seq 1 100); do
+            resp=$(curl -fsS --max-time 300 -X POST -H "Authorization: Bearer $SECRET" "$URL/tarefas/monitor")
+            echo "$resp"
+            pending=$(echo "$resp" | python3 -c "import json,sys; print(json.load(sys.stdin)['pendentes'])")
+            [ "$pending" = "0" ] && break
+          done

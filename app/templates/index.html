@@ -1,60 +1,53 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Diagnóstico de Segurança — um serviço gratuito da Nebula Host</title>
-  <link rel="stylesheet" href="/static/style.css">
+{% extends "base.html" %}
+
+{% block head %}
+{% if turnstile_site_key %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<h1>🔍 Descubra os riscos de segurança do seu negócio</h1>
+<p class="subtitle">Em menos de 1 minuto, sem precisar entender nada de tecnologia.</p>
+
+<div class="free-notice">
+  <strong>Esse serviço é 100% gratuito.</strong> A Nebula Host oferece esse diagnóstico como forma de ajudar a comunidade a entender melhor os riscos de segurança do dia a dia — sem fins lucrativos com essa ferramenta.
+</div>
+
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+
+<form action="/check" method="post" class="form">
+  <label for="domain">Digite o site da sua empresa</label>
+  <input id="domain" name="domain" type="text" placeholder="minhaempresa.com.br" required>
+
+  <label for="cnpj">CNPJ da empresa (opcional)</label>
+  <input id="cnpj" name="cnpj" type="text" placeholder="00.000.000/0000-00">
+  <p class="field-hint">Usado só para conferir se a empresa está regular na Receita Federal — útil também para checar fornecedores antes de fechar negócio.</p>
+
+  <label for="own_phone">Seu telefone comercial (opcional)</label>
+  <input id="own_phone" name="own_phone" type="text" placeholder="(11) 91234-5678">
+  <p class="field-hint">Checa se ESSE número (o seu) aparece em vazamentos de dados conhecidos.</p>
+
+  <label for="suspicious_phone">Número suspeito que te ligou (opcional)</label>
+  <input id="suspicious_phone" name="suspicious_phone" type="text" placeholder="(11) 91234-5678">
+  <p class="field-hint">Diferente do campo acima: aqui você digita o número de QUEM te ligou, pra checar sinais de golpe (ex: linha VOIP disfarçada de número local).</p>
+
   {% if turnstile_site_key %}
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
   {% endif %}
-</head>
-<body>
-  <main class="wrap">
-    <header class="brand">
-      <img src="/static/img/nebula-logo.png" alt="Nebula Host">
-      <span class="by">Diagnóstico de Segurança</span>
-    </header>
 
-    <h1>🔍 Descubra os riscos de segurança do seu negócio</h1>
-    <p class="subtitle">Em menos de 1 minuto, sem precisar entender nada de tecnologia.</p>
+  <button type="submit">Verificar minha segurança</button>
+</form>
 
-    <div class="free-notice">
-      <strong>Esse serviço é 100% gratuito.</strong> A Nebula Host oferece esse diagnóstico como forma de ajudar a comunidade a entender melhor os riscos de segurança do dia a dia — sem fins lucrativos com essa ferramenta.
-    </div>
+<div class="watch-box">
+  <strong>A verificação acima é de uma vez.</strong> Com uma conta grátis, a gente verifica o seu site toda semana e avisa por e-mail ou WhatsApp quando aparecer um problema novo — antes de virar prejuízo.
+  <a href="/entrar" class="btn-secondary">Quero ser avisado</a>
+</div>
 
-    {% if error %}
-    <p class="error">{{ error }}</p>
-    {% endif %}
-
-    <form action="/check" method="post" class="form">
-      <label for="domain">Digite o site da sua empresa</label>
-      <input id="domain" name="domain" type="text" placeholder="minhaempresa.com.br" required>
-
-      <label for="cnpj">CNPJ da empresa (opcional)</label>
-      <input id="cnpj" name="cnpj" type="text" placeholder="00.000.000/0000-00">
-      <p class="field-hint">Usado só para conferir se a empresa está regular na Receita Federal — útil também para checar fornecedores antes de fechar negócio.</p>
-
-      <label for="own_phone">Seu telefone comercial (opcional)</label>
-      <input id="own_phone" name="own_phone" type="text" placeholder="(11) 91234-5678">
-      <p class="field-hint">Checa se ESSE número (o seu) aparece em vazamentos de dados conhecidos.</p>
-
-      <label for="suspicious_phone">Número suspeito que te ligou (opcional)</label>
-      <input id="suspicious_phone" name="suspicious_phone" type="text" placeholder="(11) 91234-5678">
-      <p class="field-hint">Diferente do campo acima: aqui você digita o número de QUEM te ligou, pra checar sinais de golpe (ex: linha VOIP disfarçada de número local).</p>
-
-      {% if turnstile_site_key %}
-      <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
-      {% endif %}
-
-      <button type="submit">Verificar minha segurança</button>
-    </form>
-
-    <p class="disclaimer">Verifique apenas domínios que você possui ou tem autorização para analisar.</p>
-
-    <footer class="site-footer">
-      Um serviço gratuito de <a href="https://nebulahost.com.br">Nebula Host</a> para a comunidade, sem nenhum fim lucrativo.
-    </footer>
-  </main>
-</body>
-</html>
+<p class="disclaimer">
+  Verifique apenas domínios que você possui ou tem autorização para analisar. O diagnóstico não envia nada ao seu servidor:
+  usamos só informações públicas. <a href="/privacidade">O que fazemos com o que você digita</a>.
+</p>
+{% endblock %}

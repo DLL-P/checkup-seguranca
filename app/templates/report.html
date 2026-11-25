@@ -1,53 +1,71 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Relatório de segurança — {{ report.domain }} — Nebula Host</title>
-  <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-  <main class="wrap">
-    <header class="brand">
-      <img src="/static/img/nebula-logo.png" alt="Nebula Host">
-      <span class="by">Diagnóstico de Segurança</span>
-    </header>
+{% extends "base.html" %}
 
-    <a href="/" class="back">&larr; Verificar outro site</a>
-    <h1>Relatório de segurança</h1>
-    <p class="subtitle">{{ report.domain }}</p>
+{% block title %}Relatório de segurança — {{ report.domain }} — Nebula Host{% endblock %}
 
-    <div class="score score-{{ 'good' if report.score >= 8 else ('mid' if report.score >= 5 else 'bad') }}">
-      <span class="score-number">{{ report.score }}/10</span>
-      <span class="score-label">nota de segurança</span>
+{% block content %}
+<a href="/" class="back">&larr; Verificar outro site</a>
+<h1>Relatório de segurança</h1>
+<p class="subtitle">{{ report.domain }}</p>
+
+<div class="score score-{{ 'good' if report.score >= 8 else ('mid' if report.score >= 5 else 'bad') }}">
+  <span class="score-number">{{ report.score }}/10</span>
+  <span class="score-label">nota de segurança · <a href="/metodologia">como calculamos</a></span>
+</div>
+
+{% if report.actions %}
+<section class="actions-box">
+  <h2>Comece por aqui</h2>
+  <p class="hint">Os {{ report.actions|length }} pontos que mais pesam na sua nota, do mais urgente para o menos urgente.</p>
+  <ol>
+    {% for r in report.actions %}
+    <li><strong>{{ r.title }}.</strong> {{ r.recommendation }}</li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+
+<div class="results">
+  {% for r in report.results %}
+  <div class="card status-{{ r.status.value }}">
+    <div class="card-header">
+      <span class="icon">{{ STATUS_ICON[r.status] }}</span>
+      <h2>{{ r.title }}</h2>
+      {% if r.points %}<span class="points" title="Pontos descontados da nota">−{{ r.points }}</span>{% endif %}
     </div>
+    <p class="message">{{ r.message }}</p>
+    {% if r.recommendation %}
+    <p class="recommendation"><strong>O que fazer:</strong> {{ r.recommendation }}</p>
+    {% endif %}
+    {% if r.details or (show_private and r.private_details) %}
+    <details>
+      <summary>Detalhes técnicos (para encaminhar a quem cuida do seu TI)</summary>
+      <ul>
+        {% for d in r.details %}<li>{{ d }}</li>{% endfor %}
+        {% if show_private %}{% for d in r.private_details %}<li>{{ d }}</li>{% endfor %}{% endif %}
+      </ul>
+    </details>
+    {% endif %}
+    {% if r.private_details and not show_private %}
+    <p class="locked">🔒 {{ r.private_details|length }} detalhe(s) visível(is) só para o dono do domínio, para não entregar essa lista a quem quer atacar.
+      {% if user %}<a href="/painel">Comprove que o domínio é seu</a>{% else %}<a href="/entrar">Entre e comprove que o domínio é seu</a>{% endif %} para ver.</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
 
-    <div class="results">
-      {% for r in report.results %}
-      <div class="card status-{{ r.status.value }}">
-        <div class="card-header">
-          <span class="icon">{{ STATUS_ICON[r.status] }}</span>
-          <h2>{{ r.title }}</h2>
-        </div>
-        <p class="message">{{ r.message }}</p>
-        {% if r.recommendation %}
-        <p class="recommendation"><strong>O que fazer:</strong> {{ r.recommendation }}</p>
-        {% endif %}
-        {% if r.details %}
-        <details>
-          <summary>Detalhes técnicos</summary>
-          <ul>
-            {% for d in r.details %}<li>{{ d }}</li>{% endfor %}
-          </ul>
-        </details>
-        {% endif %}
-      </div>
-      {% endfor %}
-    </div>
+<section class="cta-grid">
+  <div class="watch-box">
+    <strong>Quer ser avisado se algo piorar?</strong> A gente verifica de novo toda semana e avisa por e-mail ou WhatsApp.
+    <a href="{{ '/painel' if user else '/entrar' }}" class="btn-secondary">Ativar monitoramento grátis</a>
+  </div>
+  <div class="watch-box">
+    <strong>Prefere que alguém resolva?</strong> A Nebula Host pode corrigir esses pontos para você ou cuidar da segurança da empresa no dia a dia.
+    <a href="{{ HELP_URL }}" class="btn-secondary">Falar com a Nebula Host</a>
+  </div>
+</section>
 
-    <footer class="site-footer">
-      Um serviço gratuito de <a href="https://nebulahost.com.br">Nebula Host</a> para a comunidade, sem nenhum fim lucrativo.
-    </footer>
-  </main>
-</body>
-</html>
+<p class="disclaimer">
+  Diagnóstico feito só com informações públicas, sem enviar nada ao seu servidor. É uma triagem: não substitui um teste de invasão (pentest).
+  Fontes: CISA KEV, EPSS (FIRST.org), Shodan InternetDB, Have I Been Pwned, GitHub e BrasilAPI — <a href="/metodologia">detalhes e licenças</a>.
+</p>
+{% endblock %}

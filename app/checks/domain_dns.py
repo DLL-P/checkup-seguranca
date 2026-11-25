@@ -11,16 +11,37 @@ from .base import CheckResult, Status
 COMMON_DKIM_SELECTORS = ["default", "selector1", "selector2", "google", "k1", "dkim", "mandrill"]
 
 
+class DnsUnavailable(Exception):
+    """O DNS não respondeu (timeout, sem servidor). Diferente de "o registro
+    não existe": sem essa distinção, uma falha momentânea de DNS virava
+    "Seu domínio não tem SPF" (🔴 crítico) — e, com o monitoramento, um alerta
+    falso no WhatsApp do cliente."""
+
+
 def _txt_records(name: str) -> list[str]:
     try:
         answers = dns.resolver.resolve(name, "TXT", lifetime=5)
-        return ["".join(part.decode() if isinstance(part, bytes) else part for part in rec.strings) for rec in answers]
-    except Exception:
+    except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
         return []
+    except Exception as exc:
+        raise DnsUnavailable(name) from exc
+    return ["".join(part.decode() if isinstance(part, bytes) else part for part in rec.strings) for rec in answers]
+
+
+def _dns_unknown(check_id: str, title: str) -> CheckResult:
+    return CheckResult(
+        check_id=check_id,
+        title=title,
+        status=Status.UNKNOWN,
+        message="Não conseguimos consultar o DNS do seu domínio agora. Tente novamente mais tarde.",
+    )
 
 
 def check_spf(domain: str) -> CheckResult:
-    records = _txt_records(domain)
+    try:
+        records = _txt_records(domain)
+    except DnsUnavailable:
+        return _dns_unknown("spf", "Proteção contra falsificação de e-mail (SPF)")
     spf = [r for r in records if r.startswith("v=spf1")]
     if not spf:
         return CheckResult(
@@ -40,7 +61,10 @@ def check_spf(domain: str) -> CheckResult:
 
 
 def check_dmarc(domain: str) -> CheckResult:
-    records = _txt_records(f"_dmarc.{domain}")
+    try:
+        records = _txt_records(f"_dmarc.{domain}")
+    except DnsUnavailable:
+        return _dns_unknown("dmarc", "Política anti-falsificação de e-mail (DMARC)")
     dmarc = [r for r in records if r.startswith("v=DMARC1")]
     if not dmarc:
         return CheckResult(
@@ -82,12 +106,17 @@ def _has_active_dkim_key(records: list[str]) -> bool:
 
 
 def check_dkim(domain: str) -> CheckResult:
-    def _check_selector(selector: str) -> bool:
-        return _has_active_dkim_key(_txt_records(f"{selector}._domainkey.{domain}"))
+    def _check_selector(selector: str) -> bool | None:
+        try:
+            return _has_active_dkim_key(_txt_records(f"{selector}._domainkey.{domain}"))
+        except DnsUnavailable:
+            return None
 
     with ThreadPoolExecutor(max_workers=len(COMMON_DKIM_SELECTORS)) as executor:
-        has_key = executor.map(_check_selector, COMMON_DKIM_SELECTORS)
+        has_key = list(executor.map(_check_selector, COMMON_DKIM_SELECTORS))
         found = [s for s, ok in zip(COMMON_DKIM_SELECTORS, has_key) if ok]
+    if not found and all(ok is None for ok in has_key):
+        return _dns_unknown("dkim", "Assinatura de e-mail (DKIM)")
     if not found:
         return CheckResult(
             check_id="dkim",

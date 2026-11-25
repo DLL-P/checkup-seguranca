@@ -1,6 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from . import scoring
 from .checks import (
     breach_check,
     cnpj_status,
@@ -11,7 +12,7 @@ from .checks import (
     phone_reputation,
     typosquat,
 )
-from .checks.base import CheckResult, STATUS_WEIGHT
+from .checks.base import CheckResult, Status, STATUS_WEIGHT
 
 DOMAIN_CHECK_MODULES = [domain_dns, ip_exposure, breach_check, leaked_secrets, typosquat]
 
@@ -21,15 +22,29 @@ class Report:
     domain: str
     score: int
     results: list[CheckResult]
+    actions: list[CheckResult] = field(default_factory=list)
+
+    def snapshot(self) -> dict:
+        """Retrato compacto do domínio, usado pelo monitoramento para saber o
+        que mudou entre uma verificação e a próxima."""
+        return {
+            "score": self.score,
+            "findings": {
+                r.check_id: {
+                    "status": r.status.value,
+                    "rule": r.rule_key,
+                    "title": r.title,
+                    "message": r.message,
+                    "points": r.points,
+                    "items": sorted(set(r.details) | set(r.private_details)),
+                }
+                for r in self.results
+            },
+        }
 
 
-def _score(results: list[CheckResult]) -> int:
-    if not results:
-        return 10
-    penalty = sum(STATUS_WEIGHT[r.status] for r in results)
-    max_penalty = len(results) * 3
-    score = round(10 * (1 - penalty / max_penalty))
-    return max(0, min(10, score))
+def run_domain_checks(domain: str) -> Report:
+    return run_all_checks(domain)
 
 
 def run_all_checks(
@@ -50,6 +65,8 @@ def run_all_checks(
         futures = [executor.submit(fn, arg) for fn, arg in jobs]
         for future in futures:
             results.extend(future.result())
-    # mostra os problemas mais graves primeiro
-    results.sort(key=lambda r: -STATUS_WEIGHT[r.status])
-    return Report(domain=domain, score=_score(results), results=results)
+
+    note = scoring.score(results)
+    # mostra primeiro o que mais pesa na nota, depois o resto por gravidade
+    results.sort(key=lambda r: (-r.points, -STATUS_WEIGHT[r.status], r.status == Status.UNKNOWN))
+    return Report(domain=domain, score=note, results=results, actions=scoring.top_actions(results))

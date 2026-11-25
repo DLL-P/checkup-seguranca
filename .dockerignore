@@ -6,3 +6,7 @@ __pycache__
 *.pyc
 ANALISE_CIBERSEGURANCA_PME.md
 README.md
+tests
+.github
+.pytest_cache
+data

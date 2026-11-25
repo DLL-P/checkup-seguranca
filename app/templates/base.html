@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Diagnóstico de Segurança — um serviço gratuito da Nebula Host{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <main class="wrap">
+    <header class="brand">
+      <a href="/" class="brand-home"><img src="/static/img/nebula-logo.png" alt="Nebula Host"></a>
+      <span class="by">Diagnóstico de Segurança</span>
+      <nav class="topnav">
+        {% if user %}
+        <a href="/painel">Meu painel</a>
+        <form action="/sair" method="post" class="inline"><button type="submit" class="link">Sair</button></form>
+        {% else %}
+        <a href="/entrar">Entrar</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    {% block content %}{% endblock %}
+
+    <footer class="site-footer">
+      Um serviço gratuito de <a href="https://nebulahost.com.br">Nebula Host</a> para a comunidade, sem nenhum fim lucrativo.
+      <br><a href="/metodologia">Como calculamos a nota</a> · <a href="/privacidade">Privacidade</a>
+    </footer>
+  </main>
+</body>
+</html>

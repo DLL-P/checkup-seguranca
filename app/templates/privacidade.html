@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Privacidade — Diagnóstico de Segurança{% endblock %}
+
+{% block content %}
+<a href="/" class="back">&larr; Voltar</a>
+<h1>Privacidade</h1>
+<p class="subtitle">O que coletamos, para quê, com quem compartilhamos e como você pede para ver ou apagar os seus dados.</p>
+
+<section class="prose">
+  <h2>Quem cuida dos seus dados</h2>
+  <p>O Diagnóstico de Segurança é um serviço da <strong>{{ controller }}</strong>{% if controller_document %} ({{ controller_document }}){% endif %}, que decide como os dados são tratados (a <em>controladora</em>, na LGPD).
+  {% if contact %}Para qualquer assunto sobre os seus dados, escreva para <a href="mailto:{{ contact }}">{{ contact }}</a>.{% endif %}</p>
+
+  <h2>Usar o diagnóstico sem conta</h2>
+  <ul>
+    <li><strong>O que você digita</strong> (o site, e, se quiser, o CNPJ e os telefones) é usado só para fazer as consultas do relatório e é enviado aos serviços listados abaixo. O diagnóstico <strong>não guarda</strong> o relatório nem o que você digitou.</li>
+    <li><strong>O site consultado</strong> fica anotado por 10 minutos, só para impedir que o mesmo domínio seja consultado repetidamente.</li>
+    <li><strong>Limite de uso:</strong> contamos quantos pedidos saem de cada conexão usando um <em>código</em> do seu IP (um resumo criptográfico que não permite recuperar o IP), apagado em até 1 hora.</li>
+    <li><strong>Registros técnicos:</strong> como todo site, o servidor registra dados técnicos de cada acesso (como o IP, a data e a página), para segurança e para cumprir o Marco Civil da Internet.</li>
+    <li>Nada do que você digita é enviado a modelos de inteligência artificial.</li>
+  </ul>
+
+  <h2>Quando você cria uma conta</h2>
+  <ul>
+    <li><strong>E-mail e entrada:</strong> guardamos o seu e-mail e a data de criação. Não existe senha: você entra por um link que vale 15 minutos e só funciona uma vez. A sessão dura 30 dias. Do link e da sessão guardamos só um resumo criptográfico.</li>
+    <li><strong>Domínios vigiados:</strong> os domínios que você cadastra, como você comprovou que são seus, e o último resultado de cada verificação, para saber o que mudou.</li>
+    <li><strong>Avisos:</strong> o histórico dos avisos enviados. Se você ativar o WhatsApp, o seu número e a data em que você autorizou.</li>
+  </ul>
+
+  <h2>Com quem compartilhamos</h2>
+  <ul>
+    <li><strong>Shodan InternetDB:</strong> o IP do site consultado, para saber o que está exposto na internet.</li>
+    <li><strong>FIRST.org (EPSS):</strong> os códigos das falhas encontradas (nenhum dado seu).</li>
+    <li><strong>CISA:</strong> só baixamos o catálogo público de falhas exploradas (nada é enviado).</li>
+    <li><strong>Have I Been Pwned:</strong> o domínio consultado, para a checagem de vazamentos.</li>
+    <li><strong>GitHub:</strong> o domínio consultado, para a busca de chaves expostas.</li>
+    <li><strong>BrasilAPI:</strong> o CNPJ, se você informar.</li>
+    <li><strong>Twilio:</strong> o número suspeito, se você informar.</li>
+    <li><strong>Cloudflare Turnstile:</strong> a verificação anti-robô do formulário, que lê dados do seu navegador.</li>
+    <li><strong>Resend:</strong> o seu e-mail e o conteúdo das mensagens (link de entrada e avisos).</li>
+    <li><strong>Meta (WhatsApp):</strong> o seu número e o aviso, só se você ativar o WhatsApp.</li>
+    <li><strong>Google Fonts:</strong> as fontes do site; ao abrir a página, o seu navegador se conecta aos servidores do Google.</li>
+    <li><strong>Hospedagem:</strong> o servidor e o banco de dados ficam num provedor de nuvem contratado.</li>
+  </ul>
+  <p>Não vendemos dados. Alguns desses serviços guardam dados fora do Brasil, principalmente nos Estados Unidos.</p>
+
+  <h2>Para que serve cada uso (bases da LGPD)</h2>
+  <ul>
+    <li><strong>A seu pedido / execução de contrato</strong> (art. 7º, V): o diagnóstico, a conta, o monitoramento e os avisos por e-mail.</li>
+    <li><strong>Legítimo interesse</strong> (art. 7º, IX): a segurança do site e a prevenção de abuso (limite de uso e intervalo entre consultas).</li>
+    <li><strong>Consentimento</strong> (art. 7º, I): os avisos por WhatsApp. Você pode retirar a autorização a qualquer momento no painel.</li>
+    <li><strong>Obrigação legal</strong> (art. 7º, II): os registros técnicos de acesso exigidos pelo Marco Civil da Internet.</li>
+  </ul>
+
+  <h2>Por quanto tempo</h2>
+  <ul>
+    <li>Link de entrada: 15 minutos. Sessão: 30 dias.</li>
+    <li>Conta, domínios, resultados e avisos: enquanto a conta existir. Ao excluir a conta, tudo é apagado.</li>
+    <li>Site consultado sem conta: 10 minutos. Código do IP no limite de uso: até 1 hora.</li>
+  </ul>
+
+  <h2>Detalhes só para o dono do domínio</h2>
+  <p>A lista de e-mails em vazamentos, os endereços de possíveis chaves expostas e a lista exata de falhas do servidor só aparecem para quem comprovou que o domínio é seu. Para um visitante qualquer, mostramos só a contagem.</p>
+
+  <h2>Seus direitos</h2>
+  <p>Pela LGPD (art. 18), você pode pedir a confirmação de que tratamos os seus dados, o acesso, a correção, a anonimização, o bloqueio ou a eliminação, a portabilidade, a informação sobre com quem compartilhamos e a revogação do consentimento.
+  {% if contact %}Escreva para <a href="mailto:{{ contact }}">{{ contact }}</a>.{% endif %}
+  Para apagar tudo de uma vez, use <strong>Excluir minha conta</strong> no painel. Você também pode reclamar à ANPD em <a href="https://www.gov.br/anpd">gov.br/anpd</a>.</p>
+
+  <h2>Cookies</h2>
+  <ul>
+    <li><code>checkup_sessao</code>: só para quem entra na conta; mantém você conectado por 30 dias. Necessário.</li>
+    <li>A verificação anti-robô da Cloudflare pode gravar os próprios cookies. Não usamos cookies de anúncio nem de medição de audiência.</li>
+  </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Como calculamos a nota — Diagnóstico de Segurança{% endblock %}
+
+{% block content %}
+<a href="/" class="back">&larr; Voltar</a>
+<h1>Como calculamos a nota</h1>
+<p class="subtitle">A regra é pública: você pode refazer a conta de qualquer relatório.</p>
+
+<section class="prose">
+  <h2>A ideia</h2>
+  <p>O peso de cada problema segue o risco <strong>real</strong> de virar ataque. Uma porta de acesso remoto aberta, ou uma falha que criminosos já estão explorando, pesa muito mais do que uma configuração de e-mail incompleta.</p>
+
+  <h2>A conta</h2>
+  <p>A nota começa em <strong>100 pontos</strong>. Cada problema encontrado desconta os pontos da tabela abaixo (o total de descontos para em 100). A nota exibida vai de 0 a 10: <strong>(100 − descontos) ÷ 10</strong>, arredondada.</p>
+  <p>Exemplo: RDP aberto na internet (−30) + sem DMARC (−10) + certificado vencendo (−5) = −45 → (100 − 45) ÷ 10 = <strong>nota 6</strong> (5,5 arredondado).</p>
+
+  <table class="rules">
+    <thead><tr><th>Problema</th><th>Desconto</th><th>Por que pesa isso</th></tr></thead>
+    <tbody>
+      {% for r in rules %}
+      <tr><td>{{ r.label }}</td><td class="num">−{{ r.points }}</td><td>{{ r.why }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>O que não entra na nota</h2>
+  <ul>
+    <li>Checagens que não puderam ser feitas (⚪): não sabemos, então não descontamos.</li>
+    <li>O CNPJ: pode ser de um fornecedor que você está avaliando, não da sua empresa.</li>
+    <li>O número suspeito que te ligou: é sobre quem ligou, não sobre você.</li>
+  </ul>
+
+  <h2>"Sendo explorada agora" e "chance de ataque"</h2>
+  <p>Quando o seu servidor mostra na internet a versão de um programa com falha conhecida, cruzamos cada falha (código CVE) com:</p>
+  <ul>
+    <li><strong>Catálogo KEV da CISA</strong> (agência de cibersegurança dos EUA): a lista oficial de falhas com <em>exploração confirmada</em> no mundo real, inclusive as usadas por grupos de ransomware.</li>
+    <li><strong>EPSS</strong> (FIRST.org): a probabilidade de a falha ser explorada nos próximos 30 dias. A partir de 10% consideramos "alta chance".</li>
+  </ul>
+  <p>A versão é deduzida do que o servidor mostra publicamente; se o fornecedor corrigiu sem mudar o número da versão, pode ser falso alarme. Por isso o relatório sempre pede para confirmar com quem cuida do servidor.</p>
+
+  <h2>Nada é enviado ao seu servidor</h2>
+  <p>As portas abertas e as falhas vêm do <strong>Shodan InternetDB</strong>, que já varre a internet inteira. O diagnóstico só consulta essas informações públicas: não fazemos varredura no seu servidor nem no de ninguém.</p>
+
+  <h2>Detalhes só para o dono</h2>
+  <p>Qualquer pessoa pode ver a nota e os problemas de um domínio, como acontece com qualquer informação pública. Mas a lista de <strong>quais e-mails vazaram</strong>, <strong>onde estão chaves expostas</strong> e <strong>quais falhas exatas o servidor tem</strong> só aparece para quem comprova que o domínio é seu, para não entregar o mapa a quem quer atacar.</p>
+
+  <h2>Fontes e licenças</h2>
+  <ul>
+    {% for name, url, license in sources %}
+    <li><a href="{{ url }}">{{ name }}</a> — {{ license }}</li>
+    {% endfor %}
+    <li><a href="https://haveibeenpwned.com/">Have I Been Pwned</a> — vazamentos de dados (licença CC BY 4.0, com crédito)</li>
+    <li><a href="https://docs.github.com/rest/search">GitHub Code Search</a> — busca de chaves expostas em código público</li>
+    <li><a href="https://brasilapi.com.br/">BrasilAPI</a> — situação cadastral do CNPJ (dado público da Receita Federal)</li>
+  </ul>
+</section>
+{% endblock %}

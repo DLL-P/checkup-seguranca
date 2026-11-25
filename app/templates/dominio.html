@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{ d.domain }} — Meu painel{% endblock %}
+
+{% block content %}
+<a href="/painel" class="back">&larr; Meu painel</a>
+<h1>{{ d.domain }}</h1>
+
+{% if notice == "comprovado" %}
+<p class="success">Pronto! O domínio está comprovado. Já começamos a primeira verificação; os detalhes completos aparecem no relatório.</p>
+{% elif notice == "dns-nao-encontrado" %}
+<p class="error">Ainda não encontramos o registro no DNS. Mudanças de DNS podem levar de alguns minutos a algumas horas para aparecer: tente de novo mais tarde.</p>
+{% endif %}
+
+{% if d.verified_at %}
+<section class="panel">
+  <h2>✅ Vigiado</h2>
+  <p class="hint">Comprovado {{ 'pelo e-mail da empresa' if d.verify_method == 'email' else 'pelo registro no DNS' }}.
+  {% if d.last_checked_at %}Última verificação: {{ d.last_checked_at[:10] }}{% if d.last_score is not none %}, nota {{ d.last_score }}/10{% endif %}.{% else %}A primeira verificação está em andamento.{% endif %}</p>
+  <form action="/painel/dominios/{{ d.id }}/relatorio" method="post" class="form compact">
+    <button type="submit">Ver relatório completo agora</button>
+  </form>
+  <p class="hint">No relatório completo aparecem os detalhes que ficam escondidos para visitantes: quais e-mails vazaram, onde estão possíveis chaves expostas e a lista exata de falhas do servidor.</p>
+</section>
+
+<section class="panel">
+  <h2>Avisos enviados</h2>
+  {% if alerts %}
+  <ul class="alert-list">
+    {% for a in alerts %}
+    <li><span class="tag">{{ a.sent_at[:10] }}</span> {{ a.summary }} <span class="hint">({{ a.channels }})</span></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="hint">Nenhum aviso até agora. Quando algo piorar, aparece aqui e chega no seu e-mail ou WhatsApp.</p>
+  {% endif %}
+</section>
+{% else %}
+<section class="panel">
+  <h2>Falta comprovar que o site é seu</h2>
+  <p>É isso que libera o monitoramento e os detalhes completos do relatório. Escolha o jeito mais fácil para você:</p>
+
+  <h3>Jeito 1 — entrar com o e-mail da empresa (mais fácil)</h3>
+  <p class="hint">Se você tem um e-mail <strong>@{{ d.domain }}</strong>, saia e entre de novo com ele, e adicione o site outra vez. O domínio fica comprovado na hora.</p>
+
+  <h3>Jeito 2 — registro no DNS (peça a quem cuida do seu site)</h3>
+  <p class="hint">Mande esta mensagem para o seu responsável de TI ou para a empresa de hospedagem:</p>
+  <div class="copy-box">
+    Por favor, crie um registro <strong>TXT</strong> no domínio <strong>{{ d.domain }}</strong> com o valor:<br>
+    <code>{{ txt_value }}</code>
+  </div>
+  <p class="hint">Depois que o registro estiver criado, clique em verificar. Pode remover o registro depois de comprovado.</p>
+  <form action="/painel/dominios/{{ d.id }}/verificar" method="post" class="form compact">
+    <button type="submit">Já criei, verificar agora</button>
+  </form>
+</section>
+{% endif %}
+
+<form action="/painel/dominios/{{ d.id }}/remover" method="post" class="inline">
+  <button type="submit" class="link danger-link">Parar de vigiar e remover este site</button>
+</form>
+{% endblock %}

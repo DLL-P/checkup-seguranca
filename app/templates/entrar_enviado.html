@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Confira o seu e-mail — Diagnóstico de Segurança{% endblock %}
+
+{% block content %}
+<h1>📬 Confira o seu e-mail</h1>
+<p class="subtitle">Se o endereço <strong>{{ email }}</strong> estiver certo, o link de entrada chega em instantes.</p>
+<div class="free-notice">O link vale por 15 minutos e só funciona uma vez. Não chegou? Olhe a caixa de spam ou <a href="/entrar">peça de novo</a>.</div>
+{% if dev_link %}
+<p class="disclaimer">Modo de desenvolvimento (DEV_SHOW_LOGIN_LINK): <a href="{{ dev_link }}">{{ dev_link }}</a></p>
+{% endif %}
+{% endblock %}

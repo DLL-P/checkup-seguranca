@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Entrar — Diagnóstico de Segurança{% endblock %}
+
+{% block content %}
+<h1>Entrar</h1>
+<p class="subtitle">Sem senha: mandamos um link de entrada para o seu e-mail.</p>
+
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+<form action="/entrar" method="post" class="form">
+  <label for="email">Seu e-mail</label>
+  <input id="email" name="email" type="email" placeholder="voce@minhaempresa.com.br" required autocomplete="email">
+  <p class="field-hint">Dica: use o e-mail da empresa (ex.: voce@minhaempresa.com.br). Assim o domínio já fica comprovado como seu, sem precisar mexer em nada técnico.</p>
+  <button type="submit">Receber link de entrada</button>
+</form>
+
+<div class="free-notice">
+  <strong>O que a conta grátis faz:</strong> verifica o seu site toda semana e avisa por e-mail (ou WhatsApp, se você quiser) quando aparecer um problema novo — uma porta perigosa aberta, uma falha que criminosos começaram a explorar, o certificado do site perto de vencer.
+</div>
+{% endblock %}

@@ -7,6 +7,18 @@ app = 'checkupseguro'
 primary_region = 'gru'
 
 [build]
+
+[env]
+  DATABASE_PATH = '/data/checkup.db'
+  APP_BASE_URL = 'https://checkupseguro.fly.dev'
+
+# Banco SQLite das contas e do monitoramento. Crie o volume antes do primeiro
+# deploy:  fly volumes create checkup_data --region gru --size 1
+# Com volume, o app roda em 1 máquina só (o SQLite não é compartilhado).
+[mounts]
+  source = 'checkup_data'
+  destination = '/data'
+
 [http_service]
   internal_port = 8000
   force_https = true

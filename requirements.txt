@@ -6,3 +6,4 @@ dnspython==2.6.1
 requests==2.32.3
 python-dotenv==1.0.1
 slowapi==0.1.9
+redis==8.2.0
